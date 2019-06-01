@@ -1,6 +1,19 @@
-# WebApiThrottle
-   ASP.NET WebApi实现请求频率限制
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+# WebApiThrottle   ASP.NET WebApi实现请求频率限制
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Http.Controllers;
+using System.Web.Http.Filters;
+
+namespace WebApiThrottle.Attribute
+{
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class ThrottleAttribute : ActionFilterAttribute
     {
         private readonly HandleRequest _handleRequest;
@@ -10,16 +23,33 @@
             this._handleRequest = new HandleRequest();
             this.Seconds = seconds;
         }
-          public override async Task OnActionExecutingAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
-    {
-      
-        var valid = await this._handleRequest.IsValidRequest(actionContext, Seconds);
-        if (!valid)
-           actionContext.Response = new HttpResponseMessage((HttpStatusCode)429) { ReasonPhrase = "Too Many Requests!" };
+
+        public override async Task OnActionExecutingAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
+        {
+          
+            var valid = await this._handleRequest.IsValidRequest(actionContext, Seconds);
+            if (!valid)
+               actionContext.Response = new HttpResponseMessage((HttpStatusCode)429) { ReasonPhrase = "Too Many Requests!" };
+        }
     }
 }
 
-  public class HandleRequest
+
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Net.Http;
+using System.ServiceModel.Channels;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Caching;
+using System.Web.Http.Controllers;
+using Newtonsoft.Json;
+
+namespace WebApiThrottle.Attribute
+{
+    public class HandleRequest
     {
         private string Name  => "Client1";
 
@@ -68,3 +98,4 @@
             return null;
         }
     }
+}
